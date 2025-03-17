@@ -1,0 +1,44 @@
+services:
+  app:
+    build:
+      context: .
+    container_name: eccomerce_app
+    environment:
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: postgres
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    volumes:
+      - ./migrations:/migrations
+    networks:
+      - eccomerce_network
+
+  postgres:
+    image: postgres:15
+    container_name: eccomerce_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_HOST_AUTH_METHOD: md5
+    ports:
+      - "5431:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    networks:
+      - eccomerce_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  eccomerce_network:
+    driver: bridge
